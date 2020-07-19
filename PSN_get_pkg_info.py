@@ -281,6 +281,7 @@ OUTPUT_FORMATS = collections.OrderedDict([ \
     ( 1, "Linux Shell Variable Output" ),
     ( 2, "Results Output" ),
     ( 3, "Results Output in JSON format" ),
+    ( 4, "Crappy CSV format"),
     ( 50, "Additional debugging Output (Extractions, etc.)" ),
     ( 98, "Analysis Output in JSON format" ),
     ( 99, "Analysis Output" ),
@@ -3522,6 +3523,8 @@ if __name__ == "__main__":
             del Zrif
             del Rif_Number
 
+        outlist = []
+
         ## Process paths and URLs
         for Source in Arguments.source:
             ## Special cases
@@ -4566,7 +4569,8 @@ if __name__ == "__main__":
                     else:
                         print("unset PSN_PKG_FILESIZE")
                 elif Output_Format == 3 \
-                or Output_Format == 98:  ## Results/Analysis JSON Output
+                or Output_Format == 98 \
+                or Output_Format == 4:  ## Results/Analysis JSON Output
                     JSON_Output = collections.OrderedDict()
                     #
                     JSON_Output["results"] = collections.OrderedDict()
@@ -4737,7 +4741,7 @@ if __name__ == "__main__":
                             if "STRUCTURE_DEF" in JSON_Output["pbpParamSfo"]:
                                 del JSON_Output["pbpParamSfo"]["STRUCTURE_DEF"]
                     #
-                    print(json.dumps(JSON_Output, ensure_ascii=False, indent=2, default=specialToJSON))
+                    outlist.insert(0, JSON_Output)
                     del JSON_Output
                 elif Output_Format == 2 \
                 or Output_Format == 99:  ## Results/Analysis Output
@@ -5793,6 +5797,17 @@ if __name__ == "__main__":
 
             ## Clean-Up
             del Package
+        if Output_Format == 4:
+            import csv
+            with open("out.csv", "w") as f:
+                fieldnames = outlist[0]['results'].keys()
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                
+                writer.writeheader()
+                for out in outlist:
+                    writer.writerow(out['results'])
+        elif Output_Format == 3:
+            print(json.dumps(outlist, ensure_ascii=False, indent=2, default=specialToJSON))
     except SystemExit:
         raise  ## re-raise/throw up (let Python handle it)
     except:
