@@ -5797,6 +5797,23 @@ if __name__ == "__main__":
 
             ## Clean-Up
             del Package
+
+            illegal = ['NUL','\\','/',':','*','"','<','>','|']
+            Rename = False ## Hacky mess for now
+            if Rename == True:
+                if Results["SFO_CATEGORY"] == "ac":
+                    newname="{:s}_{:s}_{:s}.pkg".format(Results["SFO_CATEGORY"], Results["SFO_CONTENT_ID"], Results["SFO_TITLE"])
+                elif Results["SFO_CATEGORY"] == "gd" or Results["SFO_CATEGORY"] == "gp":
+                    newname="{:s}_{:s}_{:s}-A{:04d}-V{:04d}.pkg".format(Results["SFO_CATEGORY"], Results["SFO_CONTENT_ID"], Results["SFO_TITLE"], int(re.compile("[^0-9]").sub("", "{:.2f}".format(Results["SFO_APP_VER"]))), int(re.compile("[^0-9]").sub("", "{:.2f}".format(Results["SFO_VERSION"]))))
+                
+                for i in illegal:
+                    newname=newname.replace(i, "")
+                
+                if newname is not None:
+                    if not os.path.isdir("./{:s}".format(Results["SFO_TITLE_ID"])):
+                        os.mkdir("./{:s}".format(Results["SFO_TITLE_ID"]))
+                    os.rename(Source, "./{:s}/{:s}".format(Results["SFO_TITLE_ID"], newname))
+
         if Output_Format == 4:
             import csv
 
