@@ -5799,13 +5799,27 @@ if __name__ == "__main__":
             del Package
         if Output_Format == 4:
             import csv
-            with open("out.csv", "w") as f:
-                fieldnames = outlist[0]['results'].keys()
+
+            exists = False
+            if os.path.isfile("out.csv"):
+                exists = True
+
+            with open("out.csv", "a") as f:
+                fieldnames = ["source", "titleId", "title", "regionalTitle", "region", "minFw", "creationDate", "version", "appVer", "contentId", "pkgTotalSize", "prettySize", "fileSize", "titleUpdateUrl", "npsType", "pkgPlatform", "pkgType", "toolVersion", "pythonVersion", "pkgContentId", "pkgCidTitleId1", "pkgCidTitleId2", "pkgSfoOffset", "pkgSfoSize", "pkgDrmType", "pkgContentType", "sfoTitleId", "sfoCategory", "sfoContentId", "sfoCidTitleId1", "sfoCidTitleId2"]
                 writer = csv.DictWriter(f, fieldnames=fieldnames)
                 
-                writer.writeheader()
+                if exists == False:
+                    writer.writeheader()
+
                 for out in outlist:
-                    writer.writerow(out['results'])
+                    write = {}
+                    for field in fieldnames:
+                        if field in out['results']:
+                            write[field] = out['results'][field]
+                        else:
+                            write[field] = ""
+
+                    writer.writerow(write)
         elif Output_Format == 3:
             print(json.dumps(outlist, ensure_ascii=False, indent=2, default=specialToJSON))
     except SystemExit:
